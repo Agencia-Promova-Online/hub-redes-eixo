@@ -1,0 +1,39 @@
+name: Deploy React para Hospedagem
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: 🏗️ Build & 🚀 Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Obter código mais recente
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: 📦 Instalar dependências
+        run: npm ci
+
+      - name: 🛠️ Build do Projeto
+        run: npm run build
+
+      - name: 📂 Sincronizar Dist com Servidor
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./dist/
+          server-dir: ./redes.eixoconsorcios.com.br/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
